@@ -1,2 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap');
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body, #root { width: 100%; height: 100%; overflow: hidden; background: #0d0a07; }
+
+.overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 10; }
+.overlay > * { pointer-events: auto; }
+
+.scanline {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, #d4a57488 10%, #d4a574 50%, #d4a57488 90%, transparent 100%);
+  box-shadow: 0 0 8px #d4a57466, 0 0 20px #d4a57422;
+  transform: translateY(-50%);
+}
+
+.time-display {
+  position: absolute;
+  top: 50%;
+  right: 24px;
+  transform: translateY(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  color: #d4a574;
+  text-shadow: 0 0 10px #d4a57466;
+  cursor: pointer;
+  user-select: none;
+  text-align: right;
+  line-height: 1.6;
+}
+
+.time-display .weekday { font-size: 11px; color: #a0845c; text-transform: uppercase; letter-spacing: 2px; }
+.time-display .date { font-size: 16px; font-weight: 600; }
+.time-display .time { font-size: 20px; font-weight: 600; }
