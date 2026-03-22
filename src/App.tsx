@@ -4,6 +4,7 @@ import { OrbitControls } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import { HelixRenderer } from './helix/HelixRenderer'
+import { HelixClickHandler } from './helix/HelixClickHandler'
 import { dateToT } from './calendar/dateMapping'
 import { useStore } from './store/useStore'
 import { Scanline } from './ui/Scanline'
@@ -40,6 +41,7 @@ export function App() {
           tCenter={tCenter}
           zoomFraction={zoomFraction}
         />
+        <HelixClickHandler tStart={tCenter - 500} tEnd={tCenter + 500} resolution={400} />
         <OrbitControls mouseButtons={{ LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: undefined }} />
         <fog attach="fog" args={['#0d0a07', 15, 40]} />
         <EffectComposer>

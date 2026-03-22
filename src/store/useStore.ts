@@ -5,12 +5,14 @@ interface HelixState {
   navigatedTime: Date
   zoomLevel: number
   isFollowingNow: boolean
+  selectedTime: Date | null
 
   tick: () => void
   setNavigatedTime: (time: Date) => void
   setZoomLevel: (level: number) => void
   snapToNow: () => void
   scrubTime: (deltaMs: number) => void
+  setSelectedTime: (time: Date | null) => void
 }
 
 export const useStore = create<HelixState>((set, get) => ({
@@ -18,6 +20,7 @@ export const useStore = create<HelixState>((set, get) => ({
   navigatedTime: new Date(),
   zoomLevel: 4.0,
   isFollowingNow: true,
+  selectedTime: null,
 
   tick: () => {
     const now = new Date()
@@ -42,4 +45,6 @@ export const useStore = create<HelixState>((set, get) => ({
       isFollowingNow: false,
     }))
   },
+
+  setSelectedTime: (time: Date | null) => set({ selectedTime: time }),
 }))
