@@ -64,8 +64,8 @@ export function App() {
         gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping }}
         style={{ background: '#0d0a07' }}
       >
-        <ambientLight intensity={0.1} />
-        <pointLight position={[10, 10, 10]} intensity={0.3} />
+        <ambientLight intensity={0.05} />
+        <directionalLight position={[5, 10, 5]} intensity={0.15} color="#d4a574" />
         <HelixRenderer
           primaryLevel={primaryLevel}
           tCenter={tCenter}
@@ -74,9 +74,14 @@ export function App() {
         <HelixClickHandler tStart={tCenter - 500} tEnd={tCenter + 500} resolution={400} />
         <EventMarkers events={events} primaryLevel={primaryLevel} onEventClick={handleEventClick} />
         <OrbitControls mouseButtons={{ LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: undefined }} />
-        <fog attach="fog" args={['#0d0a07', 15, 40]} />
+        <fog attach="fog" args={['#0d0a07', 10, 35]} />
         <EffectComposer>
-          <Bloom luminanceThreshold={0.2} luminanceSmoothing={0.9} intensity={1.5} />
+          <Bloom
+            luminanceThreshold={0.15}
+            luminanceSmoothing={0.9}
+            intensity={1.8}
+            mipmapBlur
+          />
         </EffectComposer>
         <ZoomController />
         <TimeScrub />

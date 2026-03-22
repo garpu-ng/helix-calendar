@@ -1,12 +1,44 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { HELIX_LEVELS } from './levels'
 import { createHelixCurve, tubeRadius } from './geometry'
+import { useStore } from '../store/useStore'
+import { dateToT } from '../calendar/dateMapping'
+import { helixPoint } from './math'
 
 interface HelixRendererProps {
   primaryLevel: number
   tCenter: number
   zoomFraction: number
+}
+
+function NowIndicator({ level }: { level: number }) {
+  const meshRef = useRef<THREE.Mesh>(null)
+  const currentTime = useStore((s) => s.currentTime)
+
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return
+    const t = dateToT(currentTime)
+    const pos = helixPoint(level, t)
+    meshRef.current.position.copy(pos)
+
+    const pulse = 1 + Math.sin(clock.getElapsedTime() * 3) * 0.3
+    meshRef.current.scale.setScalar(pulse)
+  })
+
+  return (
+    <mesh ref={meshRef}>
+      <sphereGeometry args={[0.12, 16, 16]} />
+      <meshStandardMaterial
+        color="#fae0aa"
+        emissive="#fae0aa"
+        emissiveIntensity={2.0}
+        transparent
+        opacity={0.9}
+      />
+    </mesh>
+  )
 }
 
 export function HelixRenderer({ primaryLevel, tCenter, zoomFraction }: HelixRendererProps) {
@@ -37,6 +69,7 @@ export function HelixRenderer({ primaryLevel, tCenter, zoomFraction }: HelixRend
           opacity={opacity}
         />
       ))}
+      <NowIndicator level={primaryLevel} />
     </group>
   )
 }
