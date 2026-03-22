@@ -54,3 +54,56 @@ html, body, #root { width: 100%; height: 100%; overflow: hidden; background: #0d
 }
 .snap-to-now:hover { background: #d4a57433; border-color: #d4a57466; }
 .snap-to-now.hidden { opacity: 0; pointer-events: none; }
+
+.time-jumper-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(13, 10, 7, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.time-jumper {
+  background: #1a1510;
+  border: 1px solid #d4a57433;
+  border-radius: 12px;
+  padding: 24px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #d4a574;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.time-jumper input[type="datetime-local"] {
+  background: #0d0a07;
+  border: 1px solid #d4a57433;
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: #d4a574;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  outline: none;
+}
+
+.time-jumper input:focus { border-color: #d4a574; }
+
+.time-jumper-actions { display: flex; gap: 12px; justify-content: flex-end; }
+
+.time-jumper-actions button {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid #d4a57433;
+  background: transparent;
+  color: #d4a574;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.time-jumper-actions button.primary { background: #d4a57433; }
+.time-jumper-actions button:hover { background: #d4a57444; }
