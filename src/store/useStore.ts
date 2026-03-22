@@ -1,59 +1,47 @@
 import { create } from 'zustand'
-import { eventStore, type CalendarEvent } from '../calendar/events'
 
 interface HelixState {
   currentTime: Date
-  navigatedTime: Date
-  zoomLevel: number
+  navigatedYear: number
   isFollowingNow: boolean
-  selectedTime: Date | null
-  events: CalendarEvent[]
 
   tick: () => void
-  setNavigatedTime: (time: Date) => void
-  setZoomLevel: (level: number) => void
+  setNavigatedYear: (year: number) => void
+  scrubYear: (delta: number) => void
   snapToNow: () => void
-  scrubTime: (deltaMs: number) => void
-  setSelectedTime: (time: Date | null) => void
-  loadEvents: () => Promise<void>
 }
 
-export const useStore = create<HelixState>((set, get) => ({
+function dateToYear(d: Date): number {
+  const year = d.getFullYear()
+  const start = new Date(year, 0, 1).getTime()
+  const end = new Date(year + 1, 0, 1).getTime()
+  return year + (d.getTime() - start) / (end - start)
+}
+
+export const useStore = create<HelixState>((set) => ({
   currentTime: new Date(),
-  navigatedTime: new Date(),
-  zoomLevel: 4.0,
+  navigatedYear: dateToYear(new Date()),
   isFollowingNow: true,
-  selectedTime: null,
-  events: [],
 
   tick: () => {
     const now = new Date()
-    set((state) => ({
+    set((s) => ({
       currentTime: now,
-      navigatedTime: state.isFollowingNow ? now : state.navigatedTime,
+      navigatedYear: s.isFollowingNow ? dateToYear(now) : s.navigatedYear,
     }))
   },
 
-  setNavigatedTime: (time: Date) => set({ navigatedTime: time, isFollowingNow: false }),
+  setNavigatedYear: (year: number) =>
+    set({ navigatedYear: Math.max(0, Math.min(3000, year)), isFollowingNow: false }),
 
-  setZoomLevel: (level: number) => set({ zoomLevel: Math.max(0, Math.min(7, level)) }),
+  scrubYear: (delta: number) =>
+    set((s) => ({
+      navigatedYear: Math.max(0, Math.min(3000, s.navigatedYear + delta)),
+      isFollowingNow: false,
+    })),
 
   snapToNow: () => {
     const now = new Date()
-    set({ currentTime: now, navigatedTime: now, isFollowingNow: true })
-  },
-
-  scrubTime: (deltaMs: number) => {
-    set((state) => ({
-      navigatedTime: new Date(state.navigatedTime.getTime() + deltaMs),
-      isFollowingNow: false,
-    }))
-  },
-
-  setSelectedTime: (time: Date | null) => set({ selectedTime: time }),
-
-  loadEvents: async () => {
-    const events = await eventStore.getAll()
-    set({ events })
+    set({ currentTime: now, navigatedYear: dateToYear(now), isFollowingNow: true })
   },
 }))

@@ -1,9 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html, body, #root { width: 100%; height: 100%; overflow: hidden; background: #0d0a07; }
+html, body, #root { width: 100%; height: 100%; overflow: hidden; background: #f5f0eb; }
 
-.overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 10; }
+.overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 10;
+}
 .overlay > * { pointer-events: auto; }
 
 .scanline {
@@ -12,9 +17,9 @@ html, body, #root { width: 100%; height: 100%; overflow: hidden; background: #0d
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent 0%, #d4a57488 10%, #d4a574 50%, #d4a57488 90%, transparent 100%);
-  box-shadow: 0 0 8px #d4a57466, 0 0 20px #d4a57422;
+  background: linear-gradient(90deg, transparent 0%, #33333388 10%, #333333 50%, #33333388 90%, transparent 100%);
   transform: translateY(-50%);
+  pointer-events: none;
 }
 
 .time-display {
@@ -22,152 +27,35 @@ html, body, #root { width: 100%; height: 100%; overflow: hidden; background: #0d
   top: 50%;
   right: 24px;
   transform: translateY(-50%);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 14px;
-  color: #d4a574;
-  text-shadow: 0 0 10px #d4a57466;
-  cursor: pointer;
+  font-family: 'Share Tech Mono', monospace;
+  color: #333333;
   user-select: none;
   text-align: right;
-  line-height: 1.6;
 }
 
-.time-display .weekday { font-size: 11px; color: #a0845c; text-transform: uppercase; letter-spacing: 2px; }
-.time-display .date { font-size: 16px; font-weight: 600; }
-.time-display .time { font-size: 20px; font-weight: 600; }
-
-.snap-to-now {
-  position: absolute;
-  bottom: 24px;
-  right: 24px;
-  font-family: 'JetBrains Mono', monospace;
+.time-display .weekday {
   font-size: 11px;
-  color: #d4a574;
-  background: #d4a57418;
-  border: 1px solid #d4a57433;
-  border-radius: 8px;
-  padding: 8px 16px;
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  transition: all 0.2s ease;
-}
-.snap-to-now:hover { background: #d4a57433; border-color: #d4a57466; }
-.snap-to-now.hidden { opacity: 0; pointer-events: none; }
-
-.time-jumper-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(13, 10, 7, 0.85);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-}
-
-.time-jumper {
-  background: #1a1510;
-  border: 1px solid #d4a57433;
-  border-radius: 12px;
-  padding: 24px;
-  font-family: 'JetBrains Mono', monospace;
-  color: #d4a574;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.time-jumper input[type="datetime-local"] {
-  background: #0d0a07;
-  border: 1px solid #d4a57433;
-  border-radius: 8px;
-  padding: 12px 16px;
-  color: #d4a574;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 16px;
-  outline: none;
-}
-
-.time-jumper input:focus { border-color: #d4a574; }
-
-.time-jumper-actions { display: flex; gap: 12px; justify-content: flex-end; }
-
-.time-jumper-actions button {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  border: 1px solid #d4a57433;
-  background: transparent;
-  color: #d4a574;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.time-jumper-actions button.primary { background: #d4a57433; }
-.time-jumper-actions button:hover { background: #d4a57444; }
-
-.event-panel-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(13, 10, 7, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-}
-
-.event-panel {
-  background: #1a1510;
-  border: 1px solid #d4a57433;
-  border-radius: 12px;
-  padding: 24px;
-  width: 360px;
-  font-family: 'JetBrains Mono', monospace;
-  color: #d4a574;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.event-panel label {
-  font-size: 10px;
+  color: #888;
   text-transform: uppercase;
   letter-spacing: 2px;
-  color: #a0845c;
 }
-
-.event-panel input, .event-panel textarea {
-  background: #0d0a07;
-  border: 1px solid #d4a57433;
-  border-radius: 6px;
-  padding: 10px 12px;
-  color: #d4a574;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  outline: none;
-  width: 100%;
+.time-display .date {
+  font-size: 16px;
+  font-weight: 600;
 }
-
-.event-panel textarea { resize: vertical; min-height: 60px; }
-.event-panel input:focus, .event-panel textarea:focus { border-color: #d4a574; }
-
-.add-event-btn {
-  position: absolute;
-  bottom: 24px;
-  left: 24px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #d4a57422;
-  border: 1px solid #d4a57444;
-  color: #d4a574;
+.time-display .time {
   font-size: 20px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
+  font-weight: 600;
+  line-height: 1.4;
 }
-.add-event-btn:hover { background: #d4a57444; }
+
+.zoom-indicator {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: #999;
+  user-select: none;
+  pointer-events: none;
+}

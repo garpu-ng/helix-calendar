@@ -1,111 +1,125 @@
-import { useState, useEffect } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { useRef, useEffect, useState } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import { HelixRenderer } from './helix/HelixRenderer'
-import { HelixClickHandler } from './helix/HelixClickHandler'
-import { dateToT } from './calendar/dateMapping'
 import { useStore } from './store/useStore'
-import { Scanline } from './ui/Scanline'
-import { TimeDisplay } from './ui/TimeDisplay'
-import { SnapToNow } from './ui/SnapToNow'
-import { ZoomController } from './camera/ZoomController'
-import { TimeScrub } from './camera/TimeScrub'
-import { EventMarkers } from './ui/EventMarker'
-import { EventPanel, AddEventButton } from './ui/EventPanel'
-import type { CalendarEvent } from './calendar/events'
+import { yearToCalendarFull } from './helix/math'
+
+const MONTH_NAMES = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+]
+
+function CameraDistTracker({ distRef }: { distRef: React.MutableRefObject<number> }) {
+  useFrame(({ camera }) => {
+    distRef.current = camera.position.length()
+  })
+  return null
+}
+
+function ZoomIndicator({ distRef }: { distRef: React.MutableRefObject<number> }) {
+  const [dist, setDist] = useState(14)
+  useEffect(() => {
+    const id = setInterval(() => setDist(distRef.current), 200)
+    return () => clearInterval(id)
+  }, [distRef])
+  return (
+    <div className="zoom-indicator">
+      zoom: {dist.toFixed(1)}
+    </div>
+  )
+}
+
+function TimeDisplay() {
+  const navigatedYear = useStore((s) => s.navigatedYear)
+  const cal = yearToCalendarFull(navigatedYear)
+  const pad = (n: number) => String(n).padStart(2, '0')
+
+  return (
+    <div className="time-display">
+      <div className="weekday">{cal.weekdayName}</div>
+      <div className="date">{cal.year}-{pad(cal.month + 1)}-{pad(cal.day)}</div>
+      <div className="time">{pad(cal.hour)}:{pad(cal.minute)}:{pad(cal.second)}</div>
+    </div>
+  )
+}
 
 export function App() {
-  const navigatedTime = useStore((s) => s.navigatedTime)
-  const zoomLevel = useStore((s) => s.zoomLevel)
+  const scrubYear = useStore((s) => s.scrubYear)
   const tick = useStore((s) => s.tick)
-  const selectedTime = useStore((s) => s.selectedTime)
-  const setSelectedTime = useStore((s) => s.setSelectedTime)
-  const events = useStore((s) => s.events)
-  const loadEvents = useStore((s) => s.loadEvents)
+  const navigatedYear = useStore((s) => s.navigatedYear)
+  const camDistRef = useRef(14)
 
-  const [showEventPanel, setShowEventPanel] = useState(false)
-  const [eventInitialTime, setEventInitialTime] = useState<Date>(new Date())
-  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null)
-
+  // Real-time tick every second
   useEffect(() => {
-    const id = setInterval(tick, 1000)
+    const id = setInterval(tick, 100) // smooth sub-second movement
     return () => clearInterval(id)
   }, [tick])
 
-  useEffect(() => {
-    loadEvents()
-  }, [loadEvents])
+  // Right-click drag for time scrubbing
+  const isDragging = useRef(false)
+  const lastY = useRef(0)
 
   useEffect(() => {
-    if (selectedTime) {
-      setEventInitialTime(selectedTime)
-      setEditingEvent(null)
-      setShowEventPanel(true)
-      setSelectedTime(null)
+    const onDown = (e: MouseEvent) => {
+      if (e.button === 2) {
+        isDragging.current = true
+        lastY.current = e.clientY
+      }
     }
-  }, [selectedTime, setSelectedTime])
+    const onMove = (e: MouseEvent) => {
+      if (!(e.buttons & 2)) {
+        isDragging.current = false
+        return
+      }
+      if (!isDragging.current) return
+      const dy = e.clientY - lastY.current
+      lastY.current = e.clientY
+      scrubYear(dy * 0.5)
+    }
+    const onUp = (e: MouseEvent) => {
+      if (e.button === 2) isDragging.current = false
+    }
+    const prevent = (e: Event) => e.preventDefault()
 
-  const handleEventClick = (event: CalendarEvent) => {
-    setEditingEvent(event)
-    setEventInitialTime(event.startTime)
-    setShowEventPanel(true)
-  }
+    window.addEventListener('mousedown', onDown)
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+    window.addEventListener('contextmenu', prevent)
 
-  const primaryLevel = Math.floor(zoomLevel)
-  const zoomFraction = zoomLevel - primaryLevel
-  const tCenter = dateToT(navigatedTime)
+    return () => {
+      window.removeEventListener('mousedown', onDown)
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+      window.removeEventListener('contextmenu', prevent)
+    }
+  }, [scrubYear])
 
   return (
     <>
       <Canvas
-        camera={{ position: [8, -5, 8], fov: 50 }}
-        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping }}
-        style={{ background: '#0d0a07' }}
+        camera={{ position: [10, 0, 10], fov: 50, near: 0.0000001, far: 100000 }}
+        gl={{ antialias: true }}
+        style={{ background: '#f5f0eb' }}
       >
-        <ambientLight intensity={0.05} />
-        <directionalLight position={[5, 10, 5]} intensity={0.15} color="#d4a574" />
-        <HelixRenderer
-          primaryLevel={primaryLevel}
-          tCenter={tCenter}
-          zoomFraction={zoomFraction}
+        <HelixRenderer navigatedYear={navigatedYear} />
+        <CameraDistTracker distRef={camDistRef} />
+        <OrbitControls
+          mouseButtons={{
+            LEFT: THREE.MOUSE.ROTATE,
+            MIDDLE: THREE.MOUSE.DOLLY,
+            RIGHT: undefined as any,
+          }}
+          enableDamping
+          dampingFactor={0.1}
+          minDistance={0.0000001}
         />
-        <HelixClickHandler tStart={tCenter - 500} tEnd={tCenter + 500} resolution={400} />
-        <EventMarkers events={events} primaryLevel={primaryLevel} onEventClick={handleEventClick} />
-        <OrbitControls mouseButtons={{ LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: undefined }} />
-        <fog attach="fog" args={['#0d0a07', 10, 35]} />
-        <EffectComposer>
-          <Bloom
-            luminanceThreshold={0.15}
-            luminanceSmoothing={0.9}
-            intensity={1.8}
-            mipmapBlur
-          />
-        </EffectComposer>
-        <ZoomController />
-        <TimeScrub />
       </Canvas>
       <div className="overlay">
-        <Scanline />
+        <div className="scanline" />
         <TimeDisplay />
-        <SnapToNow />
-        <AddEventButton onClick={() => {
-          setEditingEvent(null)
-          setEventInitialTime(navigatedTime)
-          setShowEventPanel(true)
-        }} />
-        {showEventPanel && (
-          <EventPanel
-            initialTime={eventInitialTime}
-            eventId={editingEvent?.id}
-            initialTitle={editingEvent?.title}
-            initialDescription={editingEvent?.description}
-            initialColor={editingEvent?.color}
-            initialEndTime={editingEvent?.endTime}
-            onClose={() => { setShowEventPanel(false); setEditingEvent(null) }}
-          />
-        )}
+        <ZoomIndicator distRef={camDistRef} />
       </div>
     </>
   )
