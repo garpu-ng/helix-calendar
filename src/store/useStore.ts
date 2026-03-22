@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { eventStore, type CalendarEvent } from '../calendar/events'
 
 interface HelixState {
   currentTime: Date
@@ -6,6 +7,7 @@ interface HelixState {
   zoomLevel: number
   isFollowingNow: boolean
   selectedTime: Date | null
+  events: CalendarEvent[]
 
   tick: () => void
   setNavigatedTime: (time: Date) => void
@@ -13,6 +15,7 @@ interface HelixState {
   snapToNow: () => void
   scrubTime: (deltaMs: number) => void
   setSelectedTime: (time: Date | null) => void
+  loadEvents: () => Promise<void>
 }
 
 export const useStore = create<HelixState>((set, get) => ({
@@ -21,6 +24,7 @@ export const useStore = create<HelixState>((set, get) => ({
   zoomLevel: 4.0,
   isFollowingNow: true,
   selectedTime: null,
+  events: [],
 
   tick: () => {
     const now = new Date()
@@ -47,4 +51,9 @@ export const useStore = create<HelixState>((set, get) => ({
   },
 
   setSelectedTime: (time: Date | null) => set({ selectedTime: time }),
+
+  loadEvents: async () => {
+    const events = await eventStore.getAll()
+    set({ events })
+  },
 }))
