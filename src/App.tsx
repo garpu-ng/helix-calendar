@@ -8,6 +8,9 @@ import { dateToT } from './calendar/dateMapping'
 import { useStore } from './store/useStore'
 import { Scanline } from './ui/Scanline'
 import { TimeDisplay } from './ui/TimeDisplay'
+import { SnapToNow } from './ui/SnapToNow'
+import { ZoomController } from './camera/ZoomController'
+import { TimeScrub } from './camera/TimeScrub'
 
 export function App() {
   const navigatedTime = useStore((s) => s.navigatedTime)
@@ -42,10 +45,13 @@ export function App() {
         <EffectComposer>
           <Bloom luminanceThreshold={0.2} luminanceSmoothing={0.9} intensity={1.5} />
         </EffectComposer>
+        <ZoomController />
+        <TimeScrub />
       </Canvas>
       <div className="overlay">
         <Scanline />
         <TimeDisplay />
+        <SnapToNow />
       </div>
     </>
   )
